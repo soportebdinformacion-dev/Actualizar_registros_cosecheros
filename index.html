@@ -6,6 +6,7 @@
     <title>Agrícola Huarmey - Actualización de Datos</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#A61B22">
+    <!-- Iconos sugeridos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -25,7 +26,7 @@
         header {
             background-color: var(--rojo-agricola);
             color: var(--blanco);
-            padding: 15px;
+            padding: 12px 15px;
             text-align: center;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             position: sticky;
@@ -33,14 +34,24 @@
             z-index: 100;
         }
 
-        .logo-placeholder {
-            font-weight: bold;
-            font-size: 1.4rem;
-            letter-spacing: 1px;
+        .logo-container {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 12px;
+        }
+
+        .logo-empresa {
+            height: 35px; /* Tamaño adaptado para la barra superior móvil */
+            width: auto;
+            object-fit: contain;
+            border-radius: 4px; /* Opcional por si el logo tiene esquinas rectas */
+        }
+
+        .logo-texto {
+            font-weight: bold;
+            font-size: 1.3rem;
+            letter-spacing: 1px;
         }
 
         .container { max-width: 600px; margin: 20px auto; padding: 0 15px; }
@@ -132,8 +143,10 @@
 <body>
 
     <header>
-        <div class="logo-placeholder">
-            <i class="fas fa-seedling"></i> Agrícola Huarmey
+        <div class="logo-container">
+            <!-- RUTA DEL LOGO APLICADA AQUÍ -->
+            <img src="ICONO HUARMEY.png" alt="Logo Agrícola Huarmey" class="logo-empresa">
+            <span class="logo-texto">Agrícola Huarmey</span>
         </div>
     </header>
 
@@ -144,6 +157,7 @@
         </div>
 
         <form id="app-form">
+            <!-- SECCIÓN 1: DATOS PERSONALES -->
             <div class="card">
                 <h2>1. Actualización de Datos</h2>
                 
@@ -187,6 +201,7 @@
                 </div>
             </div>
 
+            <!-- SECCIÓN 2: UBICACIÓN -->
             <div class="card">
                 <h2>2. Información de Residencia</h2>
 
@@ -226,10 +241,8 @@
     <div id="toast" class="toast"></div>
 
     <script>
-        // CONFIGURACIÓN URL GOOGLE APPS SCRIPT
         const API_URL = "https://script.google.com/macros/s/AKfycbzX8VlCih-Bq3xEDHvzRIKVcPurtpB-Vmr3psl4WAIM30d1UJ0qOWyDSifbaxQ5XdnNeA/exec";
 
-        // Inicializar IndexedDB
         let db;
         const request = indexedDB.open("AgricolaHuarmeyDB", 1);
 
@@ -247,7 +260,6 @@
             actualizarContadorPendientes();
         };
 
-        // Lógica de Red y Estado de Sincronización
         function verificarRed() {
             const status = document.getElementById("connection-status");
             if (navigator.onLine) {
@@ -264,20 +276,17 @@
         window.addEventListener('online', verificarRed);
         window.addEventListener('offline', verificarRed);
 
-        // Descargar catálogos desde Google Sheets y guardar en IndexedDB
         async function descargarMaestrosDesdeSheets() {
             if(!navigator.onLine || API_URL.includes("AQUÍ")) return;
             try {
                 let response = await fetch(`${API_URL}?action=getMaestros`);
                 let data = await response.json();
                 
-                // Guardar personal
                 let tx = db.transaction("maestro_datos", "readwrite");
                 let storeDatos = tx.objectStore("maestro_datos");
                 storeDatos.clear();
                 data.datos.forEach(p => storeDatos.put(p));
 
-                // Guardar zonas
                 let tx2 = db.transaction("maestro_zona", "readwrite");
                 let storeZona = tx2.objectStore("maestro_zona");
                 storeZona.clear();
@@ -289,7 +298,6 @@
             }
         }
 
-        // Lógica de Autocompletado del Trabajador por DNI
         document.getElementById("dni").addEventListener("input", function(e) {
             let dniVal = e.target.value.replace(/\D/g, '');
             e.target.value = dniVal;
@@ -319,7 +327,6 @@
             ["nombre", "sexo", "categoria", "modalidad"].forEach(id => document.getElementById(id).value = "");
         }
 
-        // Cargar listas desplegables encadenadas de Ubicación
         let infoZonasGlobal = [];
         function cargarCombosDesdeLocal() {
             let tx = db.transaction("maestro_zona", "readonly");
@@ -330,14 +337,12 @@
                 infoZonasGlobal = req.result;
                 let deptoSelect = document.getElementById("departamento");
                 
-                // Filtrar departamentos únicos
                 let deptos = [...new Set(infoZonasGlobal.map(z => z.departamento))];
                 deptoSelect.innerHTML = '<option value="">-- Seleccione Departamento --</option>';
                 deptos.forEach(d => { if(d) deptoSelect.innerHTML += `<option value="${d}">${d}</option>`; });
             };
         }
 
-        // Listeners para los select dependientes de residencia
         document.getElementById("departamento").addEventListener("change", function(e) {
             let provSelect = document.getElementById("provincia");
             provSelect.innerHTML = '<option value="">-- Seleccione Provincia --</option>';
@@ -383,12 +388,10 @@
             if(z) document.getElementById("zona").disabled = true;
         }
 
-        // Formatear WhatsApp
         document.getElementById("whatsapp").addEventListener("input", function(e) {
             e.target.value = e.target.value.replace(/\D/g, '').substring(0, 9);
         });
 
-        // Enviar Formulario (Almacenamiento Local Primero)
         document.getElementById("app-form").addEventListener("submit", function(e) {
             e.preventDefault();
 
@@ -428,7 +431,6 @@
             };
         });
 
-        // Sincronización Remota hacia Google Sheets
         function actualizarContadorPendientes() {
             let tx = db.transaction("registros", "readonly");
             let req = tx.objectStore("registros").getAll();
@@ -457,13 +459,11 @@
                     try {
                         let res = await fetch(API_URL, {
                             method: "POST",
-                            mode: "no-cors", // Evita problemas de CORS comunes en GAS
+                            mode: "no-cors",
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify(item)
                         });
                         
-                        // Dado que usamos no-cors no podemos validar status 200 directo,
-                        // asumimos correcto si no saltó la excepción catch.
                         let txUpdate = db.transaction("registros", "readwrite");
                         txUpdate.objectStore("registros").delete(item.id); 
                     } catch(e) {
@@ -481,7 +481,6 @@
             setTimeout(() => { t.style.display = "none"; }, 3500);
         }
 
-        // Registrar Service Worker
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('service-worker.js')
                 .then(() => console.log("Service Worker Registrado Exitosamente."));
