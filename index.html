@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agrícola Huarmey - Actualización de Datos</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#A61B22">
+    <meta name="theme-color" content="#E53935">
     <!-- Iconos sugeridos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --rojo-agricola: #A61B22;
-            --rojo-oscuro: #801217;
+            --rojo-agricola: #E53935; /* Rojo más claro y vivo */
+            --rojo-oscuro: #D32F2F;   /* Tono para efectos de presión de botón */
             --blanco: #FFFFFF;
             --gris-fondo: #F4F6F6;
             --gris-texto: #333333;
@@ -42,10 +42,10 @@
         }
 
         .logo-empresa {
-            height: 35px; /* Tamaño adaptado para la barra superior móvil */
+            height: 35px;
             width: auto;
             object-fit: contain;
-            border-radius: 4px; /* Opcional por si el logo tiene esquinas rectas */
+            border-radius: 4px;
         }
 
         .logo-texto {
@@ -144,7 +144,6 @@
 
     <header>
         <div class="logo-container">
-            <!-- RUTA DEL LOGO APLICADA AQUÍ -->
             <img src="ICONO HUARMEY.png" alt="Logo Agrícola Huarmey" class="logo-empresa">
             <span class="logo-texto">Agrícola Huarmey</span>
         </div>
@@ -153,7 +152,7 @@
     <div class="container">
         <div class="status-bar">
             <span>Conexión: <span id="connection-status" class="online">Verificando...</span></span>
-            <span id="pending-badge" class="sync-badge" style="display:none;">0 pendientes</span>
+            <span id="pending-badge" class="sync-badge" style="display:none;">0 pendiente(s)</span>
         </div>
 
         <form id="app-form">
