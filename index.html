@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agrícola Huarmey - Actualización de Datos</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#A61B22">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --rojo-agricola: #A61B22;
+            --rojo-oscuro: #801217;
+            --blanco: #FFFFFF;
+            --gris-fondo: #F4F6F6;
+            --gris-texto: #333333;
+            --verde-exito: #2E7D32;
+            --alerta: #EF6C00;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body { background-color: var(--gris-fondo); color: var(--gris-texto); padding-bottom: 30px; }
+
+        header {
+            background-color: var(--rojo-agricola);
+            color: var(--blanco);
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-placeholder {
+            font-weight: bold;
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .container { max-width: 600px; margin: 20px auto; padding: 0 15px; }
+
+        .status-bar {
+            background-color: var(--blanco);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            font-weight: 600;
+        }
+
+        .online { color: var(--verde-exito); }
+        .offline { color: var(--rojo-agricola); }
+
+        .card {
+            background: var(--blanco);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        h2 { color: var(--rojo-agricola); margin-bottom: 15px; font-size: 1.2rem; border-bottom: 2px solid var(--gris-fondo); padding-bottom: 5px; }
+
+        .form-group { margin-bottom: 18px; }
+
+        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9rem; }
+
+        input, select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #D5DBDB;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+            background-color: #FAFAFA;
+        }
+
+        input:focus, select:focus { border-color: var(--rojo-agricola); background-color: var(--blanco); }
+
+        input:disabled, select:disabled { background-color: #EAECEE; color: #7F8C8D; cursor: not-allowed; }
+
+        .btn {
+            background-color: var(--rojo-agricola);
+            color: var(--blanco);
+            border: none;
+            width: 100%;
+            padding: 16px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: background 0.2s;
+        }
+
+        .btn:hover { background-color: var(--rojo-oscuro); }
+
+        .sync-badge {
+            background-color: var(--alerta);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: #fff;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-placeholder">
+            <i class="fas fa-seedling"></i> Agrícola Huarmey
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="status-bar">
+            <span>Conexión: <span id="connection-status" class="online">Verificando...</span></span>
+            <span id="pending-badge" class="sync-badge" style="display:none;">0 pendientes</span>
+        </div>
+
+        <form id="app-form">
+            <div class="card">
+                <h2>1. Actualización de Datos</h2>
+                
+                <div class="form-group">
+                    <label for="dni">DNI *</label>
+                    <input type="text" id="dni" inputmode="numeric" maxlength="8" placeholder="Ingrese 8 dígitos" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="nombre">Apellidos y Nombres</label>
+                    <input type="text" id="nombre" disabled placeholder="Autocompletado desde planilla">
+                </div>
+
+                <div class="form-group">
+                    <label for="sexo">Sexo</label>
+                    <input type="text" id="sexo" disabled placeholder="Autocompletado">
+                </div>
+
+                <div class="form-group">
+                    <label for="categoria">Categoría</label>
+                    <input type="text" id="categoria" disabled placeholder="Autocompletado">
+                </div>
+
+                <div class="form-group">
+                    <label for="modalidad">Modalidad</label>
+                    <input type="text" id="modalidad" disabled placeholder="Autocompletado">
+                </div>
+
+                <div class="form-group">
+                    <label for="whatsapp">WhatsApp *</label>
+                    <input type="text" id="whatsapp" inputmode="numeric" maxlength="9" placeholder="9 dígitos obligatorios" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="lider">Mi líder es: *</label>
+                    <select id="lider" required>
+                        <option value="">-- Seleccione un líder --</option>
+                        <option value="JOSE CHAVEZ">JOSE CHAVEZ</option>
+                        <option value="RIVADO VALLE">RIVADO VALLE</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>2. Información de Residencia</h2>
+
+                <div class="form-group">
+                    <label for="departamento">Departamento *</label>
+                    <select id="departamento" required>
+                        <option value="">-- Seleccione Departamento --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="provincia">Provincia *</label>
+                    <select id="provincia" required disabled>
+                        <option value="">-- Seleccione Provincia --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="distrito">Distrito *</label>
+                    <select id="distrito" required disabled>
+                        <option value="">-- Seleccione Distrito --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="zona">Lugar de Residencia / Zona *</label>
+                    <select id="zona" required disabled>
+                        <option value="">-- Seleccione Lugar --</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn" id="btn-guardar">GUARDAR ACTUALIZACIÓN</button>
+        </form>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // CONFIGURACIÓN URL GOOGLE APPS SCRIPT
+        const API_URL = "TU_URL_DE_GOOGLE_APPS_SCRIPT_AQUÍ";
+
+        // Inicializar IndexedDB
+        let db;
+        const request = indexedDB.open("AgricolaHuarmeyDB", 1);
+
+        request.onupgradeneeded = (e) => {
+            db = e.target.result;
+            if(!db.objectStoreNames.contains("maestro_datos")) db.createObjectStore("maestro_datos", { keyPath: "dni" });
+            if(!db.objectStoreNames.contains("maestro_zona")) db.createObjectStore("maestro_zona", { autoIncrement: true });
+            if(!db.objectStoreNames.contains("registros")) db.createObjectStore("registros", { keyPath: "id", autoIncrement: true });
+        };
+
+        request.onsuccess = (e) => {
+            db = e.target.result;
+            verificarRed();
+            cargarCombosDesdeLocal();
+            actualizarContadorPendientes();
+        };
+
+        // Lógica de Red y Estado de Sincronización
+        function verificarRed() {
+            const status = document.getElementById("connection-status");
+            if (navigator.onLine) {
+                status.textContent = "Conectado";
+                status.className = "online";
+                descargarMaestrosDesdeSheets();
+                sincronizarPendientes();
+            } else {
+                status.textContent = "Offline (Modo Campo)";
+                status.className = "offline";
+            }
+        }
+
+        window.addEventListener('online', verificarRed);
+        window.addEventListener('offline', verificarRed);
+
+        // Descargar catálogos desde Google Sheets y guardar en IndexedDB
+        async function descargarMaestrosDesdeSheets() {
+            if(!navigator.onLine || API_URL.includes("AQUÍ")) return;
+            try {
+                let response = await fetch(`${API_URL}?action=getMaestros`);
+                let data = await response.json();
+                
+                // Guardar personal
+                let tx = db.transaction("maestro_datos", "readwrite");
+                let storeDatos = tx.objectStore("maestro_datos");
+                storeDatos.clear();
+                data.datos.forEach(p => storeDatos.put(p));
+
+                // Guardar zonas
+                let tx2 = db.transaction("maestro_zona", "readwrite");
+                let storeZona = tx2.objectStore("maestro_zona");
+                storeZona.clear();
+                data.zona.forEach(z => storeZona.put(z));
+
+                tx2.oncomplete = () => cargarCombosDesdeLocal();
+            } catch (err) {
+                console.error("Error descargando catálogos remotos: ", err);
+            }
+        }
+
+        // Lógica de Autocompletado del Trabajador por DNI
+        document.getElementById("dni").addEventListener("input", function(e) {
+            let dniVal = e.target.value.replace(/\D/g, '');
+            e.target.value = dniVal;
+
+            if(dniVal.length === 8) {
+                let tx = db.transaction("maestro_datos", "readonly");
+                let store = tx.objectStore("maestro_datos");
+                let req = store.get(dniVal);
+                
+                req.onsuccess = () => {
+                    if(req.result) {
+                        document.getElementById("nombre").value = req.result.nombre;
+                        document.getElementById("sexo").value = req.result.sexo;
+                        document.getElementById("categoria").value = req.result.categoria;
+                        document.getElementById("modalidad").value = req.result.modalidad;
+                    } else {
+                        showToast("DNI no encontrado en el padrón local.");
+                        limpiarCamposPersona();
+                    }
+                };
+            } else {
+                limpiarCamposPersona();
+            }
+        });
+
+        function limpiarCamposPersona() {
+            ["nombre", "sexo", "categoria", "modalidad"].forEach(id => document.getElementById(id).value = "");
+        }
+
+        // Cargar listas desplegables encadenadas de Ubicación
+        let infoZonasGlobal = [];
+        function cargarCombosDesdeLocal() {
+            let tx = db.transaction("maestro_zona", "readonly");
+            let store = tx.objectStore("maestro_zona");
+            let req = store.getAll();
+
+            req.onsuccess = () => {
+                infoZonasGlobal = req.result;
+                let deptoSelect = document.getElementById("departamento");
+                
+                // Filtrar departamentos únicos
+                let deptos = [...new Set(infoZonasGlobal.map(z => z.departamento))];
+                deptoSelect.innerHTML = '<option value="">-- Seleccione Departamento --</option>';
+                deptos.forEach(d => { if(d) deptoSelect.innerHTML += `<option value="${d}">${d}</option>`; });
+            };
+        }
+
+        // Listeners para los select dependientes de residencia
+        document.getElementById("departamento").addEventListener("change", function(e) {
+            let provSelect = document.getElementById("provincia");
+            provSelect.innerHTML = '<option value="">-- Seleccione Provincia --</option>';
+            document.getElementById("distrito").innerHTML = '<option value="">-- Seleccione Distrito --</option>';
+            document.getElementById("zona").innerHTML = '<option value="">-- Seleccione Lugar --</option>';
+            
+            if(!e.target.value) { deshabilitarUbicaciones(true, true, true); return; }
+
+            let provs = [...new Set(infoZonasGlobal.filter(z => z.departamento === e.target.value).map(z => z.provincia))];
+            provs.forEach(p => provSelect.innerHTML += `<option value="${p}">${p}</option>`);
+            provSelect.disabled = false;
+        });
+
+        document.getElementById("provincia").addEventListener("change", function(e) {
+            let distSelect = document.getElementById("distrito");
+            distSelect.innerHTML = '<option value="">-- Seleccione Distrito --</option>';
+            document.getElementById("zona").innerHTML = '<option value="">-- Seleccione Lugar --</option>';
+            
+            if(!e.target.value) { deshabilitarUbicaciones(false, true, true); return; }
+
+            let depto = document.getElementById("departamento").value;
+            let dists = [...new Set(infoZonasGlobal.filter(z => z.departamento === depto && z.provincia === e.target.value).map(z => z.distrito))];
+            dists.forEach(d => distSelect.innerHTML += `<option value="${d}">${d}</option>`);
+            distSelect.disabled = false;
+        });
+
+        document.getElementById("distrito").addEventListener("change", function(e) {
+            let zonaSelect = document.getElementById("zona");
+            zonaSelect.innerHTML = '<option value="">-- Seleccione Lugar --</option>';
+            
+            if(!e.target.value) { deshabilitarUbicaciones(false, false, true); return; }
+
+            let depto = document.getElementById("departamento").value;
+            let prov = document.getElementById("provincia").value;
+            let zonas = infoZonasGlobal.filter(z => z.departamento === depto && z.provincia === prov && z.distrito === e.target.value).map(z => z.zona);
+            zonas.forEach(z => zonaSelect.innerHTML += `<option value="${z}">${z}</option>`);
+            zonaSelect.disabled = false;
+        });
+
+        function deshabilitarUbicaciones(p, d, z) {
+            if(p) document.getElementById("provincia").disabled = true;
+            if(d) document.getElementById("distrito").disabled = true;
+            if(z) document.getElementById("zona").disabled = true;
+        }
+
+        // Formatear WhatsApp
+        document.getElementById("whatsapp").addEventListener("input", function(e) {
+            e.target.value = e.target.value.replace(/\D/g, '').substring(0, 9);
+        });
+
+        // Enviar Formulario (Almacenamiento Local Primero)
+        document.getElementById("app-form").addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            let dni = document.getElementById("dni").value;
+            let nombre = document.getElementById("nombre").value;
+            let whatsapp = document.getElementById("whatsapp").value;
+
+            if(dni.length !== 8 || nombre === "") { alert("Por favor verifique el DNI del trabajador."); return; }
+            if(whatsapp.length !== 9) { alert("El WhatsApp debe tener exactamente 9 dígitos."); return; }
+
+            let registro = {
+                fecha: new Date().toISOString(),
+                dni: dni,
+                nombre: nombre,
+                sexo: document.getElementById("sexo").value,
+                categoria: document.getElementById("categoria").value,
+                modalidad: document.getElementById("modalidad").value,
+                whatsapp: whatsapp,
+                lider: document.getElementById("lider").value,
+                departamento: document.getElementById("departamento").value,
+                provincia: document.getElementById("provincia").value,
+                distrito: document.getElementById("distrito").value,
+                zona: document.getElementById("zona").value,
+                status: "Pendiente"
+            };
+
+            let tx = db.transaction("registros", "readwrite");
+            tx.objectStore("registros").add(registro);
+
+            tx.oncomplete = () => {
+                showToast("Cambios guardados localmente con éxito.");
+                document.getElementById("app-form").reset();
+                limpiarCamposPersona();
+                deshabilitarUbicaciones(true, true, true);
+                actualizarContadorPendientes();
+                if(navigator.onLine) sincronizarPendientes();
+            };
+        });
+
+        // Sincronización Remota hacia Google Sheets
+        function actualizarContadorPendientes() {
+            let tx = db.transaction("registros", "readonly");
+            let req = tx.objectStore("registros").getAll();
+            req.onsuccess = () => {
+                let pendientes = req.result.filter(r => r.status === "Pendiente").length;
+                let badge = document.getElementById("pending-badge");
+                if(pendientes > 0) {
+                    badge.textContent = `${pendientes} pendiente(s)`;
+                    badge.style.display = "inline-block";
+                } else {
+                    badge.style.display = "none";
+                }
+            };
+        }
+
+        async function sincronizarPendientes() {
+            if(!navigator.onLine || API_URL.includes("AQUÍ")) return;
+            
+            let tx = db.transaction("registros", "readwrite");
+            let store = tx.objectStore("registros");
+            let req = store.getAll();
+
+            req.onsuccess = async () => {
+                let listado = req.result.filter(r => r.status === "Pendiente");
+                for(let item of listado) {
+                    try {
+                        let res = await fetch(API_URL, {
+                            method: "POST",
+                            mode: "no-cors", // Evita problemas de CORS comunes en GAS
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(item)
+                        });
+                        
+                        // Dado que usamos no-cors no podemos validar status 200 directo,
+                        // asumimos correcto si no saltó la excepción catch.
+                        let txUpdate = db.transaction("registros", "readwrite");
+                        txUpdate.objectStore("registros").delete(item.id); 
+                    } catch(e) {
+                        console.error("Fallo al subir registro: ", e);
+                    }
+                }
+                actualizarContadorPendientes();
+            };
+        }
+
+        function showToast(msg) {
+            let t = document.getElementById("toast");
+            t.textContent = msg;
+            t.style.display = "block";
+            setTimeout(() => { t.style.display = "none"; }, 3500);
+        }
+
+        // Registrar Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(() => console.log("Service Worker Registrado Exitosamente."));
+        }
+    </script>
+</body>
+</html>

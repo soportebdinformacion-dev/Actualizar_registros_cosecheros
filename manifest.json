@@ -1,0 +1,22 @@
+{
+  "name": "Agrícola Huarmey - Gestión Integrada",
+  "short_name": "AgriHuarmey",
+  "description": "Aplicación interna para la actualización de datos de campo de Agrícola Huarmey.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F4F6F6",
+  "theme_color": "#A61B22",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2722/2722123.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2722/2722123.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
